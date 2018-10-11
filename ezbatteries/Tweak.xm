@@ -40,6 +40,38 @@ static long long deviceCharge;
 
 %end
 
+@interface EZBatteriesActivator :NSObject<LAListener>
+@end
+
+@implementation EZBatteriesActivator
+
+- (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName{
+
+if ([listenerName isEqualToString:@"com.ezbatteries.show"]){
+
+
+} else if ([listenerName isEqualToString:@"com.ezbatteries.hide"]){
+
+
+} else if ([listenerName isEqualToString:@"com.ezbatteries.toggle"]){
+
+}
+}
++(void)load {
+
+LAActivator *activator= [%c(LAActivator) sharedInstance]; 
+
+if ([activator isRunningInsideSpringBoard]) {
+
+	[activator registerListener:[self new] forName:@"com.ezbatteries.show"];
+
+	[activator registerListener:[self new] forName:@"com.ezbatteries.hide"];
+
+	[activator registerListener:[self new] forName:@"com.ezbatteries.toggle"];
+	}
+}
+@end
+
 
 %ctor
 {
