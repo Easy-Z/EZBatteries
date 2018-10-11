@@ -1,6 +1,6 @@
 Package: com.idevicehacked.ezbatteries
 Name: EzBatteries
-Depends: mobilesubstrate, libactivator (>= 1.9.13~beta2)
+Depends: mobilesubstrate, libactivator
 Version: 1.0
 Architecture: iphoneos-arm
 Description: EZBattteries displays your iPhone battery percentage and the battery percentage of any device that you have connected through Bluetooth. Ex: Air Pods, Apple Watch etc... KNOWN+BUGS%0D%0A*Sometimes+takes+a+while+to+activate+when+using+BPX+%28BatteryPercentX%2C+by+SparkDev_%29+"Will+try+to+contact+Spark+next+week".
