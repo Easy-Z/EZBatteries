@@ -40,35 +40,39 @@ static long long deviceCharge;
 
 %end
 
+
+
+////using activator in your tweak- create object comforming to LAListener protocol
 @interface EZBatteriesActivator :NSObject<LAListener>
 @end
 
 @implementation EZBatteriesActivator
+///Register our listener names
++(void)load {
+LAActivator *activator= [%c(LAActivator) sharedInstance];
 
+if ([activator isRunningInsideSpringBoard]) {
+
+[activator registerListener:[self new] forName:@"com.ezbatteries.show"];
+
+[activator registerListener:[self new] forName:@"com.ezbatteries.hide"];
+
+[activator registerListener:[self new] forName:@"com.ezbatteries.toggle"];
+}
+}
+
+///React to our listener being triggered
 - (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName{
 
 if ([listenerName isEqualToString:@"com.ezbatteries.show"]){
 
-
+///show battery info (needs adding)
 } else if ([listenerName isEqualToString:@"com.ezbatteries.hide"]){
 
-
+///hide battery info (needs adding)
 } else if ([listenerName isEqualToString:@"com.ezbatteries.toggle"]){
-
+///toggle battery info (needs adding)
 }
-}
-+(void)load {
-
-LAActivator *activator= [%c(LAActivator) sharedInstance]; 
-
-if ([activator isRunningInsideSpringBoard]) {
-
-	[activator registerListener:[self new] forName:@"com.ezbatteries.show"];
-
-	[activator registerListener:[self new] forName:@"com.ezbatteries.hide"];
-
-	[activator registerListener:[self new] forName:@"com.ezbatteries.toggle"];
-	}
 }
 @end
 
