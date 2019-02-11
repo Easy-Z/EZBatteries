@@ -1,5 +1,7 @@
-#import <libactivator/libactivator.h>
 #import <notify.h>
+#import "JBBulletinManager.h"
+
+@class UNSRemoteNotificationServer;
 
 @interface UIStatusBarWindow : UIWindow
 -(void)check; //from %new
@@ -18,8 +20,17 @@
 }
 @end
 
+static NSString *notifMsg = @"";
 static NSString *deviceName;
 static long long deviceCharge;
+static BOOL alert;
+
+static void loadPrefs() {
+  CFStringRef APPID = CFSTR("com.idevicehacked.ezbatteriesprefs");
+  NSArray *keyList = [(NSArray *)CFPreferencesCopyKeyList((CFStringRef)APPID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) autorelease];
+	NSDictionary *prefs = (NSDictionary *)CFPreferencesCopyMultiple((CFArrayRef)keyList, (CFStringRef)APPID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+  alert = [[prefs valueForKey:@"alert"] boolValue];
+}
 
 %hook UIStatusBarWindow
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -40,69 +51,51 @@ static long long deviceCharge;
 
 %end
 
-@interface EZBatteriesActivator :NSObject<LAListener>
-@end
 
-@implementation EZBatteriesActivator
-
-- (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName{
-
-if ([listenerName isEqualToString:@"com.ezbatteries.show"]){
-
-
-} else if ([listenerName isEqualToString:@"com.ezbatteries.hide"]){
-
-
-} else if ([listenerName isEqualToString:@"com.ezbatteries.toggle"]){
-
-}
-}
-+(void)load {
-
-LAActivator *activator= [%c(LAActivator) sharedInstance]; 
-
-if ([activator isRunningInsideSpringBoard]) {
-
-	[activator registerListener:[self new] forName:@"com.ezbatteries.show"];
-
-	[activator registerListener:[self new] forName:@"com.ezbatteries.hide"];
-
-	[activator registerListener:[self new] forName:@"com.ezbatteries.toggle"];
-	}
-}
-@end
-
-
-%ctor
-{
+%ctor {
   if ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]) { //check if its springboard
     int regToken; // The registration token
     notify_register_dispatch("com.idevicehacked.ezbatteries", &regToken, dispatch_get_main_queue(), ^(int token) {  //Request notification delivery to a dispatch queue
     BCBatteryDeviceController *bcb = [%c(BCBatteryDeviceController) sharedInstance];
     NSArray *devices = MSHookIvar<NSArray *>(bcb, "_sortedDevices");
+    loadPrefs();
+    UIAlertController *confirmationAlertController;
 
-    UIAlertController *confirmationAlertController = [UIAlertController
-                                    alertControllerWithTitle:@"ShowMe"
-                                    message:@""
-                                    preferredStyle:UIAlertControllerStyleAlert];
+    if (alert) {
+      confirmationAlertController = [UIAlertController
+      alertControllerWithTitle:@"Percentages"
+      message:@""
+      preferredStyle:UIAlertControllerStyleAlert];
+    }
 
     for (BCBatteryDevice *device in devices) {
       deviceName = MSHookIvar<NSString *>(device, "_name");
       deviceCharge = MSHookIvar<long long>(device, "_percentCharge");
+      notifMsg = [notifMsg stringByAppendingString:[NSString stringWithFormat:@"%@ : %lld%%\n", deviceName, deviceCharge]];
+      }
 
-        confirmationAlertController.message =  [confirmationAlertController.message stringByAppendingString:[NSString stringWithFormat:@"%@ : %lld%%\n", deviceName, deviceCharge]];;
-        }
-    confirmationAlertController.title = @"Percentages";
-    UIAlertAction *confirmCancel = [UIAlertAction
-                                    actionWithTitle:@"Dismiss"
-                                    style:UIAlertActionStyleDefault
-                                    handler:^(UIAlertAction * action)
-                                    {
-                                        //Do nothing
-                                    }];
+      //Removes the last \n to remove gap
+      notifMsg = [notifMsg substringToIndex:[notifMsg length]-1];
 
-    [confirmationAlertController addAction:confirmCancel];
-    [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:confirmationAlertController animated:YES completion:NULL];
-  });
-    }
+      //shows the alert if it is checked in prefs
+      if (alert) {
+        confirmationAlertController.title = @"Percentages";
+        UIAlertAction *confirmCancel = [UIAlertAction
+        actionWithTitle:@"Dismiss"
+        style:UIAlertActionStyleDefault
+        handler:^(UIAlertAction * action)
+        {
+          //Do nothing
+        }];
+
+        [confirmationAlertController addAction:confirmCancel];
+        [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:confirmationAlertController animated:YES completion:NULL];
+        confirmationAlertController.message =  [confirmationAlertController.message stringByAppendingString:notifMsg];
+      } else { // creates notif instead
+        UIImage *img = [UIImage imageWithContentsOfFile:@"/Library/EZBatteries/icon.png"];
+        [[objc_getClass("JBBulletinManager") sharedInstance] showBulletinWithTitle:@"Percentages" message:notifMsg overrideBundleImage:img];
+      }
+      notifMsg = @"";
+    });
   }
+}
