@@ -1,0 +1,9 @@
+Package: com.easy-z.ezbatteries
+Name: EZBatteries
+Depends: mobilesubstrate, net.limneos.libbulletin, PreferenceLoader
+Version: 2.1.1
+Architecture: iphoneos-arm
+Description: EZBatteries displays your iPhone battery percentage and the battery percentage of any device that you have connected through Bluetooth, by double tapping the status bar. Ex: Air Pods, Apple Watch etc…
+Maintainer: Easy-Z & Karimo299
+Author: Easy-Z & Karimo299
+Section: Tweaks
