@@ -8,7 +8,7 @@ Made by [Easy-Z](https://twitter.com/_easy_z_) and [Karimo299](https://twitter.c
 
 Icon by [PINPAL](https://twitter.com/TPINPAL).
 
-Check the review out: https://www.idownloadblog.com/2019/04/18/clean-player/
+Check the review out: https://www.idownloadblog.com/2019/02/13/ezbatteries/
 
 # Changelog
 * Code clean-up.
